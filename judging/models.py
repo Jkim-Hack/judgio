@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # makes sure to delete users when deleting judges in bulk
 class JudgeQuerySet(models.QuerySet):
 
@@ -37,7 +38,43 @@ class Judge(models.Model):
     def __str__(self):
         return self.name()
 
+
 # make migration commands
 # python manage.py makemigrations judging
 # python manage.py sqlmigrate judging 0001
 # python manage.py migrate
+
+
+class TeamQuerySet(models.QuerySet):
+
+    def delete(self, *args, **kwargs):
+        for obj in self:
+            obj.user.delete()
+        super(TeamQuerySet, self).delete(*args, **kwargs)
+
+
+# Team registration model
+class Team(models.Model):
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    team_name = models.CharField(max_length=50);
+    project_name = models.CharField(max_length=50);
+    project_description = models.CharField(max_length=200);
+
+    # TODO: need delete function
+
+    def teamname(self):
+        return self.team_name;
+
+    def projectname(self):
+        return self.project_name;
+
+    def projectdesc(self):
+        return self.project_description;
+
+    def delete(self, *args, **kwargs):
+        self.user.delete();
+        return super(self.__class__, self).delete(*args, **kwargs)
+
+    def __str__(self):
+        return self.team_name;
